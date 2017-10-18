@@ -1,0 +1,181 @@
+\documentclass[11pt]{article}
+\renewcommand{\baselinestretch}{1.05}
+\usepackage{amsmath,amsthm,verbatim,amssymb,amsfonts,amscd, graphicx}
+\usepackage{bm}
+\usepackage{graphics}
+\topmargin0.0cm
+\headheight0.0cm
+\headsep0.0cm
+\oddsidemargin0.0cm
+\textheight23.0cm
+\textwidth16.5cm
+\footskip1.0cm
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem*{surfacecor}{Corollary 1}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{question}{Question}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\DeclareMathOperator*{\argminA}{arg\,min}
+
+\begin{document}
+
+
+
+\title{Expectation Maximization with Coin Toss example}
+\author{Marijo Simunovic}
+\maketitle
+\section{Coin toss problem description}
+This documents contains detailed solution for the problem described in \cite{nature}. In summary, someone choose randomly one of two biased coins five times. Each time, selected coin has been tossed and outcomes are recorded. We are given the outcomes of this five events but not the identities of coins whom each event belongs. Also, coin biases are unknown. Our goal is to somehow infer these parameters from the given data. In order to solve the problem we resort the Expectation Maximization (EM) algorithm. 
+
+\section{Theoretical background of EM}
+
+Given the statistical model which generates a set \textbf{X} of observed data, a set of unobserved latent data or missing values \textbf{Z}, and a vector of unknown parameters \textbf{$\Theta$}, along with a likelihood function \boldmath$\textit{L}(\Theta;X,Z) = \textit{p}(X,Z|\Theta)$,
+the maximum likelihood estimate (MLE) of the unknown parameters is determined by the marginal likelihood of the observed data
+
+\boldmath
+\begin{equation}
+\textit{L}(\Theta;X)=\textit{p}(X|\Theta)=\int\textit{p}(X,Z|\Theta)\textit{d}Z
+\end{equation}
+The EM algorithm seeks to find the MLE of the marginal likelihood by iteratively applying these two steps:
+
+\textit{Expectation step (E step):} Calculate the expected value of the log likelihood function, with respect to the conditional distribution of \textbf{Z} given \textbf{X} under the current estimate of the parameters $\Theta^{(t)}$:
+
+\begin{equation}
+Q(\Theta|\Theta^{(t)})=E_{Z|X,\Theta^{(t)}}[log\textit{L}(\Theta;X,Z)]    
+\end{equation}
+
+\textit{Maximization step (M step):} Find the parameter that maximizes this quantity:
+\begin{equation}
+\Theta^{(t+1)}=\argminA_\Theta Q(\Theta|\Theta^{(t)})
+\end{equation}
+This is a word by word definition copied from [1]\footnote{I choose to take this particular definition (out of many out there) because it is the first one I actually understood. I don't think that this is a better or worse than the others, it's just that my brain was finally ready.}.
+If you don't understand what the above means at first, don't worry. It is merely due to the compactness of the mathematical language. The first term means: Set up the model for the likelihood function pretending that you know what is the value of $\Theta$. In the actual solution, we randomly instantiate its values to $\Theta_i \in [0,1]$ where \textit{i} is the i-th component of the vector $\Theta$. Once we have defined this equation (model) we take the expectation over it to find the probability of each possible value of $Z$, given $\Theta$. Then we compute a better estimate for the parameters $\Theta$ using these probabilities. We iterate these procedure until convergence.
+\subsection{Math Mode}\label{section:mathmode}
+Vector \textbf{z} corresponds to the event of choosing one of the two given coins. It is bivariate, the values of each of the two possible outcomes are mutually exclusive.
+\begin{equation}
+\bm{z_{n}} = \begin{bmatrix}
+z_{n1} \\
+z_{n2}
+\end{bmatrix}
+\in \left \{
+\begin{bmatrix}
+{1} \\
+{0}
+\end{bmatrix},
+\begin{bmatrix}
+{0} \\
+{1}
+\end{bmatrix}
+\right \}
+\end{equation}
+
+Probability of the event $z_n$ (which coin we selected in the n-th event) is given by
+\begin{equation}
+p(z_{n}) = \prod_{k=1}^{2} \pi_{k}^{z_{nk}}
+\end{equation}
+with requirement that $\sum_{k}\pi_{k}$ = 1.
+
+Each single coin toss is independent on the other tosses. It only depends on the coin we choose previously. Probability of the single coin toss outcome given coin k is
+\begin{equation}
+p(x_n^j|\boldmath{z_n},\Theta)=\prod_{k=1}^{2}[\Theta_k^{x_n^j}(1-\Theta_k^{1-x_n^j})]^{z_{nk}}
+\end{equation}
+where $x_n^j=1$ if j-th outcome was head and $x_n^j=0$ if j-th outcome was tail. We can now determine the probability of each of our 5 events
+\begin{equation}
+p(\{x^1_n\cdots x^{10}_n\}|z_n,\Theta)=\prod_{j=1}^{10}p(x_n^j|\boldmath{z_n},\Theta)
+\end{equation}
+
+Joint probability of the coin toss outcomes and coin selections is given by:
+\begin{equation}
+p(X_1,\dots, X_5,\boldmath{z_1,\dots,z_5}|\Theta) 
+\end{equation}
+\begin{equation}
+= p(\{x^1_1\cdots x^{10}_1\},\dots,\{x^1_5\cdots x^{10}_5\}, z_1,\dots,z_5|\Theta)
+\end{equation}
+\begin{equation}
+= p(\{x^1_1\cdots x^{10}_1\},\dots,\{x^1_5\cdots x^{10}_5\}| z_1,\dots,z_5,\Theta)p(z_1,\dots,z_5)
+\end{equation}
+\begin{equation}
+=\prod_{n=1}^{5}p(\{x^1_n\cdots x^{10}_n\}|z_n,\Theta) \prod_{n=1}^{5}p(\boldmath{z_n})
+\end{equation}
+Finally, combining the above we get the equation
+\begin{equation}
+p(X_1,\dots, X_5,\boldmath{z_1,\dots,z_5}|\Theta) = 
+\prod_{n=1}^{5}\prod_{j=1}^{10}\prod_{k=1}^{2}[\Theta_k^{x_n^j}(1-\Theta_k^{1-x_n^j})]^{z_{nk}}\prod_{n=1}^{5}\prod_{k=1}^{2}\pi_{k}^{z_{nk}}
+\end{equation}
+Taking the log of the expression above we get rid of the products in exchange of the summations.
+\begin{equation}
+log(P) = 
+\sum_{n=1}^{5}\sum_{k=1}^{2}z_{nk}[\sum_{j=1}^{10}log(\Theta_k^{x_n^j}(1-\Theta_k^{1-x_n^j}))+log(\pi_{k})]
+\end{equation}
+The final step is taking the expectation over the $z$ random variable. In this case, we are using the conditional expectation, as we do not
+know what was the outcome on each of the step. Using the linearity of the expectation as
+\begin{equation}
+E_{Z|X}[log(P)] = 
+\sum_{n=1}^{5}\sum_{k=1}^{2}E_{Z|X}[z_{nk}][\sum_{j=1}^{10}log(\Theta_k^{x_n^j}(1-\Theta_k^{1-x_n^j}))+log(\pi_{k})]
+\end{equation}
+Conditional expectation gives as the expected value of the random experiment in light of the
+new information on which we are conditioning. Consider throwing an ordinary dice. The expected value of the outcome is $E(number on dice)=(1+2+3+4+5+6)/6=3.5$. But if I told you the parity of the outcome, in that case we would calculate the expectation $E(odd)=(1+3+5)/3=3$ and $E(even)=(2+4+6)/3=4$. We see that it is not enough to express the expectation with the one value only. We can use similar analogy in our experiment. As we have see the outcomes of each of the five events, we will assign bigger value of $\Theta$ to the ones that have had more heads. If there isn't any significant difference in the outcomes we will have a hard time trying to figure out which event belongs to which coin.
+\begin{equation}
+  E_{Z|X}[z_{nk}]=
+\sum_{z}z_{nk}p(z_n|\{x^1_n\cdots x^{10}_n\};\Theta)  
+\end{equation}
+
+Using the Bayes formula, the posterior of $z_n$ given values of the n-th event is
+\begin{equation}
+p(z_n|\{x^1_n\cdots x^{10}_n\};\Theta)=\frac{p(\{x^1_n\cdots x^{10}_n\}|z_n;\Theta)p(z_n)}{p(\{x^1_n\cdots x^{10}_n\};\Theta)}
+\end{equation}
+We already know the expressions for the terms in numerator, and the expression in denominator is given by marginalizing over all possible outcomes of $z$ (in our, case there are only two, as already mentioned). 
+\begin{equation}
+p(z_n|x_n;\Theta)=\frac{\prod_{k=1}^{2}[\pi_{k}p(x_n;\Theta_k)]^{z_{nk}}}{\sum_{z_m}\prod_{m=1}^{2}[\pi_{m}p(x_n;\Theta_m)]^{z_{nm}}}
+\end{equation}
+Going back to our expectation formula
+\begin{equation}
+E_{Z|X}[z_{nk}]=
+\frac{\sum_{z_n}z_{nk}\prod_{k=1}^{2}[\pi_{k}p(x_n;\Theta_k)]^{z_{nk}}}{\sum_{z_m}\prod_{m=1}^{2}[\pi_{m}p(x_n;\Theta_m)]^{z_{nm}}}
+\end{equation}
+We see that in the numerator those events where $z_{nk}=0$ will be eliminated, while in the denominator we are still summing over all possibilities. 
+\begin{equation}
+E_{Z|X}[z_{nk}]=
+\frac{\pi_{k}p(x_n;\Theta)}{\sum_{m=1}^{2}\pi_{m}p(x_n;\Theta_m)}
+\end{equation}
+
+As the probability of the choosing both coins is equal, we know that the $\pi_k=0.5$ in both cases. Thus, we can eliminate it from our expression. Also, we fix the $\Theta_k$ values (first iteration uses randomly initiated values, while the subsequent steps use values calculated in the previous step) in the E step of the EM algorithm. 
+
+In the M step, we fix the expectation value calculated in the E step vary $\Theta_k$ values. To find the values which maximize the expectation of log equation, we use the derivation. Second term, after the summation sign becomes constant, so it does not have the effect on the maximization procedure.
+\begin{equation}
+maxL(\Theta)=E_{Z|X}[p(X_1,\dots, X_5,\boldmath{z_1,\dots,z_5}|\Theta]
+\end{equation}
+\begin{equation}
+=\sum_{n=1}^{5}\sum_{j=1}^{10}\sum_{k=1}^{2}E_{Z|X}[z_{nk}]log(\Theta_k^{x_n^j}(1-\Theta_k^{1-x_n^j}))+CONST.
+\end{equation}
+\begin{equation}
+=\sum_{n=1}^{5}\sum_{j=1}^{10}\sum_{k=1}^{2}E_{Z|X}[z_{nk}]({x_n^j}log(\Theta_k)+({1-x_n^j})log(1-\Theta_k))+CONST.
+\end{equation}
+For a single coin $k$
+\begin{equation}
+\frac{dL(\Theta)}{d\Theta_k}=\sum_{n=1}^{5}\sum_{j=1}^{10}E_{Z|X}[z_{nk}](\frac{x_n^j}{\Theta_k}-\frac{1-x_n^j}{1-\Theta_k})=0
+\end{equation}
+Multiplying with both denominators $\Theta_k(1-\Theta_k)$ we get
+\begin{equation}
+\frac{dL(\Theta)}{d\Theta_k}=\sum_{n=1}^{5}\sum_{j=1}^{10}E_{Z|X}[z_{nk}]({x_n^j}-{\Theta_k})=0
+\end{equation}
+and finally, since $\Theta$'s index does not appear in the summation indexes, we can simply divide to obtain its (maximal) value
+\begin{equation}
+\Theta_k=\frac{\sum_{n=1}^{5}\sum_{j=1}^{10}E_{Z|X}[z_{nk}]{x_n^j}}{\sum_{n=1}^{5}\sum_{j=1}^{10}E_{Z|X}[z_{nk}]}
+\end{equation}
+We see that the result for each coin is weighted expectation of a single coin over a sum of the expectations of both coins.
+
+EM is sort of like moving a heavy table without anyone's help. You push a bit from one side and then from the other. Bit by bit you are reaching the goal.
+\begin{thebibliography}{} 
+\bibitem{wikiEM} Expectation Maximization algorithm wiki page,\url{https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorith}
+\bibitem{nature} Chuong B Do,  Serafim Batzoglou, \emph{What is the expectation maximization algorithm}, Nature Biotechnology 26, 897-899, dpi:10.1038/nbt14052008, \url{http://www.nature.com/nbt/journal/v26/n8/full/nbt1406.html}
+
+\end{thebibliography}
+
+\end{document}
