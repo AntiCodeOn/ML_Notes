@@ -1,4 +1,3 @@
-
 import numpy as np
 import operator
 from scipy import stats
@@ -24,11 +23,7 @@ def max_likelihood(E, bin_events):
 	numTheta0=bin_events*E[:,0:1]
 	numTheta1=bin_events*E[:,1:]
 	den=10*np.sum(E, axis=0)
-	nomTheta0= np.sum(numTheta0)
-	nomTheta1= np.sum(numTheta1)
-	return [nomTheta0/den[0], nomTheta1/den[1]]
-	
-	
+	return [np.sum(numTheta0)/den[0], np.sum(numTheta1)/den[1]]
 
 events = (['HTTTHHTHTH',
           'HHHHTHHHHH',
@@ -44,23 +39,23 @@ experiments = list(zip(heads, tails))
 print(coins)
 print(heads)
 
-
 #random theta guess
 rTheta = [0.6, 0.5]
 
 #t, T, s = sp.symbols('theta, T, s')
 #likelihood = (t**s)*(1-t)**(T-s)
 #_likelihood = sp.lambdify((t,T,s), likelihood, modules='numpy')
+diff = 0.00001
 
-for i in range(10):
-	E = np.array([expect_zk(rTheta, experiment) for experiment in experiments])
-	#print(' ')
-	#print(E)
-	#print(' ')
-	#print(bin_events)
-
-	
-	rTheta = max_likelihood(E, bin_events)
+for i in range(10000):
+   E = np.array([expect_zk(rTheta, experiment) for experiment in experiments])
+   rThetaPrev = rTheta
+   rTheta = max_likelihood(E, bin_events)
+   diff0 = rThetaPrev[0]-rTheta[0]
+   diff1 = rThetaPrev[1]-rTheta[1]
+   if((abs(diff0) < diff) and (abs(diff1) < diff)):
+      print('iterations until convergence: ', i+1)
+      break
 	
 print(rTheta)
 
