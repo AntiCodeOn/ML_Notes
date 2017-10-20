@@ -101,8 +101,10 @@ log(P) =
 The final step is taking the expectation over hidden random variable $z$. In this case, we are using the conditional expectation, as we do not
 know what was the outcome on each of the step. Using the linearity of the expectation as
 \begin{equation}
-E_{Z|X}[log(P)] = 
+\begin{gathered}
+E_{Z|X}[log(P)] =  \\
 \sum_{n=1}^{5}\sum_{k=1}^{2}E_{Z|X}[z_{nk}][\sum_{j=1}^{10}log(\Theta_k^{x_n^j}(1-\Theta_k^{1-x_n^j}))+log(\pi_{k})]
+\end{gathered}
 \end{equation}
 Conditional expectation gives us the expected value of the random experiment in light of the
 new information on which we are conditioning. Consider throwing an ordinary dice. The expected value of the outcome is $E(number-on-dice)=(1+2+3+4+5+6)/6=3.5$. But if I told you the parity of the outcome, in that case we would calculate the expectation $E(odd)=(1+3+5)/3=3$ and $E(even)=(2+4+6)/3=4$. We see that it is not enough to express the expectation with the one value only. We can use similar analogy in our experiment. As we have see the outcomes of each of the five events, we will assign bigger value of $\Theta$ to the ones that have had more heads. If there isn't any significant difference in the outcomes we will have a hard time trying to figure out which event belongs to which coin.
@@ -153,10 +155,9 @@ Multiplying with both denominators $\Theta_k(1-\Theta_k)$ we get
 \end{equation}
 and finally, since $\Theta$'s index does not appear in the summation indexes, we can simply divide to obtain its (maximal) value
 \begin{equation}
-\Theta_k=\frac{\sum_{n=1}^{5}\sum_{j=1}^{10}E_{Z|X}[z_{nk}]{x_n^j}}{10\:\sum_{n=1}^{5}E_{Z|X}[z_{nk}]}
+\Theta_k=\frac{\sum_{n=1}^{5}E_{Z|X}[z_{nk}]{\sum_{j=1}^{10}x_n^j}}{\sum_{n=1}^{5}E_{Z|X}[z_{nk}]\sum_{j=1}^{10}1}
 \end{equation}
-We see that the result for each coin is weighted expectation of a single coin over a sum of the expectations of both coins.
-
+The new parameter value is a weighted sum of the expectations - in the numerator we are taking into account only head outcomes and in the denominator both head and tail outcomes.\\
 EM is sort of like trying to move a heavy table without anyone's help. You push a bit from one side and then from the other. Bit by bit you are reaching the goal.
 
 \section{EM algorithm}
