@@ -1,0 +1,171 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{upgreek}
+\usepackage{amssymb}
+
+\title{Variational Inference with Coin Toss example}
+\author{AntiCodeOn \\ email: {anticodeon@gmail.com}  }
+\date{September 2017}
+
+
+\newcommand\JointProb{p(X,Z,\Theta,\pi,a,b)}
+\newcommand\Factorized{p(Z,\Theta,\pi,a,b)}
+\newcommand\ProbZGivenpi{\mbox{P(Z)}}
+\newcommand\ProbSingleCoin{\Theta_k^{x_n^j}(1-\Theta_k)^{1-x_n^j}}
+
+
+
+\newcommand\ProdK{\prod_{k=1}^{K}}
+\newcommand\ProdN{\prod_{n=1}^{N}}
+\newcommand\ProdJ{\prod_{j=1}^{J}}
+\newcommand\SumK{\sum_{k=1}^{K}}
+\newcommand\SumN{\sum_{n=1}^{N}}
+\newcommand\SumJ{\sum_{j=1}^{J}}
+
+\newcommand\Qfactor{\ProdK{q_k(z_k)}}
+
+\DeclareMathOperator*{\argminA}{arg\,min}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+Variational inference (VI) is a machine learning method for approximation of the difficult to compute probability densities that appear in Bayesian methods. In general, the goal is to find a surrogate distribution over hidden variables and parameters of the original Bayesian model that is close to the original distribution but where the evaluation is computationally efficient. The closeness is defined in terms of a divergence measure between the approximate distribution and the original distribution. 
+
+\section{Motivation}
+Consider classical Bayesian setup 
+\begin{equation}\label{BayesEq}
+p(Z|X) = \frac{p(X,Z)}{p(X)}
+\end{equation}
+where $X=x_{1:n}$ denotes the observed data while $Z=z_{1:k}$ denotes all the hidden variables and parameters of the model. Numerator of the fraction is called joint distribution
+\begin{equation}
+    p(X,Z) = p(X|Z)\:p(Z)
+\end{equation}
+and the denominator (often called evidence) is a marginal distribution
+\begin{equation}
+    p(X)=\int_{Z}p(X,Z)\:dZ
+\end{equation}
+Computing the posterior probability is often a very hard problem (for example, due to the exponentially large number of hidden states or because required integrations do not have a closed-form analytical solution). This is why we resort to techniques such as approximation, where the objective is to find a joint distribution $q(Z)$ that replaces original posterior $p(Z|X)$ in a way that enables us to find computationally tractable solutions.
+\subsection{Variational inference setup}
+Variational inference posits a set of densities $\mathcal{Q}$  over the latent variables $Z$. We typically try to minimize the Kullback-Leibler (KL) 
+\begin{equation}\label{KL_divergence}
+    KL(q(Z)\: ||\: p(Z|X)) = E_{q}\left[log\:\frac{q(Z)}{p(Z|X)}\right]
+\end{equation}
+of the approximate and the original, true joint distribution
+\begin{equation}
+    q^*(Z) = \argminA_{q(Z)\in\mathcal{Q}}\: KL(q(Z)\: ||\: p(Z|X))
+\end{equation}
+KL divergence tells us how much information we loose by choosing the approximate distribution instead of true posterior distribution. 
+We can expand the right hand side of (\ref{KL_divergence})
+\begin{equation}
+KL(q(Z)\: ||\: p(Z|X)) = E_q[q(Z)] - E_q[log\:p(Z|X)]
+\end{equation}
+Using (\ref{BayesEq}) we get
+\begin{equation}
+KL(q(Z)\: ||\: p(Z|X)) = p(X) - \underbrace{(E_q[log\:p(X,Z)] - E_q[q(Z)])}_\text{ELBO(q)}
+\end{equation}
+
+We want to minimize the KL divergence by varying distribution q(Z). $p(X)$ does not depend on $q$ and is always positive (or equal to zero) so we need to maximize the $ELBO(q)$. The only assumption we are making is that $q(Z)$ factorizes in the following way 
+\begin{equation}
+q(Z)=\Qfactor{}
+\end{equation}
+which means that we are breaking possible dependencies between hidden variables in our approximation process.
+\begin{equation}
+    ELBO(q) = \int q(Z)\: log\:{p(X,Z)}\:dZ - \int q(Z)\:log{\:q(Z)}\:dZ
+\end{equation}
+
+\section{Variational inference application}
+\begin{equation}
+    p(Z|\pi) = \ProdN \ProdK \pi_k^{z_{nk}}
+\end{equation}
+\begin{equation}
+    p(\pi) = Dir(\pi|\alpha_0) = C(\alpha_0)\ProdK{}\pi_k^{\alpha_0-1}
+\end{equation}
+\begin{equation}
+    p(X|Z,\Theta)= \ProdN\ProdK\ProdJ[\ProbSingleCoin{}]^{z_{nk}}
+\end{equation}
+\begin{equation}
+    p(\Theta|a,b) = \frac{\Theta^{a-1}(1-\Theta)^{b-1}}{Beta(a,b)}
+\end{equation}
+
+Joint distribution is given by
+\begin{equation}\label{joint_decomp}
+    \JointProb{} = p(X|Z,\Theta)p(Z|\pi)p(\pi)p(\Theta|a,b)
+\end{equation}
+with factors on the right side of the equation as defined above. Only variables $X={x_1,\dots,x_N}$ were observed. In the next step we consider a variational distribution with the following factorization
+\begin{equation}\label{factor_decomp1}
+q(Z, \pi, \Theta) = q(Z)q(\pi,\Theta).
+\end{equation}
+We are separating the latent variables and parameters and this is actually the only assumption we are making.
+In order to proceed with the factorization, we use the general result given by Bishop[2006].
+\begin{equation}
+    ln\: q^*(Z)=E_{\pi,\Theta}[ln\:\JointProb] + const
+\end{equation}
+For the factor of \textbf{Z} we are only interested in those components of the decomposition \ref{joint_decomp} that depend on \textbf{Z}. All other terms are absorbed into the additive normalization constant, giving:
+\begin{equation}
+    ln\: q^*(Z)=E_{\pi}[ln\:p(Z|\pi)] + E_\Theta[ln\:p(X|Z,\Theta)] + const
+\end{equation}
+where
+\begin{equation}
+    E_{\pi}[ln\:p(Z|\pi)]  = \SumN\SumK z_{nk}E_\pi[ln\:\pi_k]
+\end{equation}
+and
+\begin{equation}
+    E_\Theta[ln\:p(X|Z,\Theta)] = \SumN\SumK z_{nk}E_\Theta[ln\:\SumJ{\ProbSingleCoin}]
+\end{equation}
+Proceeding similarly for \textbf{$\pi$} and \textbf{$\Theta$} we get the following expression
+\begin{equation}
+    ln\: q^*(\pi,\Theta)=E_{Z}[ln\:(\pi) + ln\:p(Z|\pi)] + E_Z[ln\:p(X|Z,\Theta) + ln\:p(\Theta)] + const
+\end{equation}
+Since there are no expressions that depend on both parameters at the same time we may proceed with the factorization of the parameters independently
+\begin{equation}\label{factor_decomp2}
+    ln\:q(\pi,\Theta) = q(\pi)\:q(\Theta)
+\end{equation}
+where
+\begin{equation}
+    ln\:q^*(\pi) = ln\:p(\pi) + E_{Z}[ln\:p(Z|\pi)] + const
+\end{equation}
+\begin{equation}\label{factor_pi_log}
+    ln\:q^*(\pi) = (\alpha_0-1)\SumK{ln\:\pi_k} + \SumK ln\:\pi_k r_k + const
+\end{equation}
+where $r_{k} = \SumN E[z_{nk}]$
+We have already derived the expectations over $Z$ in EM document.
+Taking the exponential of equation \ref{factor_pi_log} we get that the 
+\begin{equation}
+    q(\pi) = Dir(\pi| \upalpha)
+\end{equation}
+where $\upalpha$ is vector with K components $\alpha_k = \alpha_0+r_k$
+
+\begin{equation}
+    ln\:q^*(\Theta) = ln\:p(\Theta) + E_Z[ln\:p(X|Z,\Theta)] + const
+\end{equation}
+\begin{equation}
+    ln\:q^*(\Theta) = \SumK (ln\:[\Theta^{a_k-1}(1-\Theta)^{b_k-1}] + r_{k}\SumJ \:ln[\Theta^{x_n^j}(1-\Theta)^{1-x_n^j}]_ + const
+\end{equation}
+\begin{equation}
+    ln\:q^*(\Theta) = \SumK ln\:[\Theta^{a_k-1+n_H{r_k}}(1-\Theta)^{b_k-1+n_T{r_k}}] + const
+\end{equation}
+where $n_H$ equals number of the outcomes of $x_n^j = 1$ (number of heads), and $n_T$ number of the outcomes of $x_n^j = 0$ ( number tails).
+We see that the factor for $\Theta$ is Beta distributed variable:
+\begin{equation}
+    q(\Theta) = Beta(\Theta|A, B)
+\end{equation}
+where $A$ is a vector with parameter components $a = a_{k}+n_H{r_k}$ and $B$ with components $b = b_{k}+n_T{r_k}$.
+\section{Variational lower bound}
+Variational lower bound $L$ is given by 
+\begin{equation}
+    L = E[ln\:\JointProb{}] - E[ln\:\Factorized{}]
+\end{equation}
+Using results from \ref{joint_decomp}, \ref{factor_decomp1} and \ref{factor_decomp2}
+this simplifies to
+\begin{equation}
+\begin{split}
+    L =& E[ln\:p(X|Z,\Theta)] + E[ln\:p(Z|\pi)] + E[ln\:p(\pi)] + E[ln\:p(\Theta|a,b)] \\
+    & -E[ln\:q(Z)] - E[ln\:q(\pi)] - E[ln\:q(\Theta)]
+\end{split}        
+\end{equation}
+\section{Algorithm}
+\textit{This section should contain algorithmic description of the problem}
+\end{document}
