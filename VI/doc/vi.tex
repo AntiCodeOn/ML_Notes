@@ -121,7 +121,7 @@ Proceeding similarly for \textbf{$\pi$} and \textbf{$\Theta$} we get the followi
 \end{equation}
 Since there are no expressions that depend on both parameters at the same time we may proceed with the factorization of the parameters independently
 \begin{equation}\label{factor_decomp2}
-    ln\:q(\pi,\Theta) = q(\pi)\:q(\Theta)
+    q(\pi,\Theta) = q(\pi)\:q(\Theta)
 \end{equation}
 where
 \begin{equation}
@@ -150,7 +150,7 @@ where $\upalpha$ is vector with K components $\alpha_k = \alpha_0+r_k$
 where $n_H$ equals number of the outcomes of $x_n^j = 1$ (number of heads), and $n_T$ number of the outcomes of $x_n^j = 0$ ( number tails).
 We see that the factor for $\Theta$ is Beta distributed variable:
 \begin{equation}
-    q(\Theta) = Beta(\Theta|A, B)
+    q^*(\Theta) = Beta(\Theta|A, B)
 \end{equation}
 where $A$ is a vector with parameter components $a = a_{k}+n_H{r_k}$ and $B$ with components $b = b_{k}+n_T{r_k}$.
 \section{Variational lower bound}
@@ -165,6 +165,17 @@ this simplifies to
     L =& E[ln\:p(X|Z,\Theta)] + E[ln\:p(Z|\pi)] + E[ln\:p(\pi)] + E[ln\:p(\Theta|a,b)] \\
     & -E[ln\:q(Z)] - E[ln\:q(\pi)] - E[ln\:q(\Theta)]
 \end{split}        
+\end{equation}
+We write down each of the terms separately:
+\begin{equation}
+    E[ln\:p(\pi)] = ln\:C(\alpha_0)+(\alpha_0-1)\SumK (\psi(\alpha_k)-\psi(\SumK \alpha_k))
+\end{equation}
+\begin{equation}
+    E[ln\:p(\Theta|a,b)]=\SumK (\psi(a)-\psi(a+b))
+\end{equation}
+\begin{equation}
+    E[ln\:p(Z|\pi) = \SumN\SumK r_{nk}(\psi(\alpha_k)-\psi(\SumK \alpha_k))
+\
 \end{equation}
 \section{Algorithm}
 \textit{This section should contain algorithmic description of the problem}
