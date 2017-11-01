@@ -1,5 +1,6 @@
 import numpy as np
 import operator
+import matplotlib.pyplot as plt
 from scipy import stats
 #import sympy as sp
 
@@ -47,15 +48,28 @@ rTheta = [0.6, 0.5]
 #_likelihood = sp.lambdify((t,T,s), likelihood, modules='numpy')
 diff = 0.00001
 
+rThetaList0 = [rTheta[0]]
+rThetaList1 = [rTheta[1]]
+
 for i in range(10000):
    E = np.array([expect_zk(rTheta, experiment) for experiment in experiments])
    rThetaPrev = rTheta
    rTheta = max_likelihood(E, bin_events)
    diff0 = rThetaPrev[0]-rTheta[0]
    diff1 = rThetaPrev[1]-rTheta[1]
+   rThetaList0.append(rTheta[0])
+   rThetaList1.append(rTheta[1])
    if((abs(diff0) < diff) and (abs(diff1) < diff)):
       print('iterations until convergence: ', i+1)
       break
+
+fig, ax = plt.subplots()
+x = list(range(len(rThetaList0)))
+ax.plot(x, rThetaList0)
+ax.plot(x, rThetaList1)
+ax.grid()
+fig.tight_layout()
+plt.show()
 	
 print(rTheta)
 
