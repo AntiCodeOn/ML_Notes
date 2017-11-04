@@ -10,7 +10,7 @@
 
 
 \newcommand\JointProb{p(X,Z,\Theta,\pi,a,b)}
-\newcommand\Factorized{p(Z,\Theta,\pi,a,b)}
+\newcommand\Factorized{q(Z,\Theta,\pi,a,b)}
 \newcommand\ProbZGivenpi{\mbox{P(Z)}}
 \newcommand\ProbSingleCoin{\Theta_k^{x_n^j}(1-\Theta_k)^{1-x_n^j}}
 
@@ -49,7 +49,7 @@ and the denominator (often called evidence) is a marginal distribution
 \end{equation}
 Computing the posterior probability is often a very hard problem (for example, due to the exponentially large number of hidden states or because required integrations do not have a closed-form analytical solution). This is why we resort to techniques such as approximation, where the objective is to find a joint distribution $q(Z)$ that replaces original posterior $p(Z|X)$ in a way that enables us to find computationally tractable solutions.
 \subsection{Variational inference setup}
-Variational inference posits a set of densities $\mathcal{Q}$  over the latent variables $Z$. We typically try to minimize the Kullback-Leibler (KL) 
+Variational inference posits a set of densities $\mathcal{Q}$  over the latent variables $Z$. We typically try to minimize the Kullback-Leibler (KL) divergence
 \begin{equation}\label{KL_divergence}
     KL(q(Z)\: ||\: p(Z|X)) = E_{q}\left[log\:\frac{q(Z)}{p(Z|X)}\right]
 \end{equation}
@@ -87,7 +87,7 @@ which means that we are breaking possible dependencies between hidden variables 
     p(X|Z,\Theta)= \ProdN\ProdK\ProdJ[\ProbSingleCoin{}]^{z_{nk}}
 \end{equation}
 \begin{equation}
-    p(\Theta|a,b) = \frac{\Theta^{a-1}(1-\Theta)^{b-1}}{Beta(a,b)}
+    p(\Theta|a,b) = \ProdK\frac{\Theta^{a-1}(1-\Theta)^{b-1}}{Beta(a,b)}
 \end{equation}
 
 Joint distribution is given by
@@ -116,7 +116,7 @@ and
     E_\Theta[ln\:p(X|Z,\Theta)] = \SumN\SumK z_{nk}E_\Theta[\SumJ ln\:\ProbSingleCoin]
 \end{equation}
 \begin{equation}
-    ln\: q^*(Z)=\SumN\SumK z_{nk}\left(E_\Theta[\SumJ ln\:\ProbSingleCoin]\right)
+    ln\: q^*(Z)=\SumN\SumK z_{nk}\left(E_\pi[ln\:\pi_k] + E_\Theta[SumJ ln\:\ProbSingleCoin]\right)
 \end{equation}
 Proceeding similarly for \textbf{$\pi$} and \textbf{$\Theta$} we get the following expression
 \begin{equation}
@@ -145,15 +145,15 @@ where $\upalpha$ is vector with K components $\alpha_k = \alpha_0+r_k$
     ln\:q^*(\Theta) = ln\:p(\Theta) + E_Z[ln\:p(X|Z,\Theta)] + const
 \end{equation}
 \begin{equation}
-    ln\:q^*(\Theta) = \SumK (ln\:[\Theta^{a_k-1}(1-\Theta)^{b_k-1}] + r_{k}\SumJ \:ln[\Theta^{x_n^j}(1-\Theta)^{1-x_n^j}]_ + const
+    ln\:q^*(\Theta) = \SumK (ln\:[\Theta_k^{a_k-1}(1-\Theta_k)^{b_k-1}] + r_{k}\SumJ \:ln[\Theta_k^{x_n^j}(1-\Theta_k)^{1-x_n^j}]_ + const
 \end{equation}
 \begin{equation}
-    ln\:q^*(\Theta) = \SumK ln\:[\Theta^{a_k-1+n_H{r_k}}(1-\Theta)^{b_k-1+n_T{r_k}}] + const
+    ln\:q^*(\Theta) = \SumK ln\:[\Theta_k^{a_k-1+n_H{r_k}}(1-\Theta_k)^{b_k-1+n_T{r_k}}] + const
 \end{equation}
 where $n_H$ equals number of the outcomes of $x_n^j = 1$ (number of heads), and $n_T$ number of the outcomes of $x_n^j = 0$ ( number tails).
 We see that the factor for $\Theta$ is Beta distributed variable:
 \begin{equation}
-    q^*(\Theta) = Beta(\Theta|A, B)
+    q^*(\Theta) = \ProdK Beta(\Theta|A, B)
 \end{equation}
 where $A$ is a vector with parameter components $a = a_{k}+n_H{r_k}$ and $B$ with components $b = b_{k}+n_T{r_k}$.
 \section{Variational lower bound}
