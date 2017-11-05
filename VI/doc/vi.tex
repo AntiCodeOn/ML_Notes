@@ -81,7 +81,7 @@ which means that we are breaking possible dependencies between hidden variables 
     p(Z|\pi) = \ProdN \ProdK \pi_k^{z_{nk}}
 \end{equation}
 \begin{equation}
-    p(\pi) = Dir(\pi|\alpha_0) = C(\alpha_0)\ProdK{}\pi_k^{\alpha_0-1}
+    p(\pi) = Dir(\pi|\alpha_0) = C(\alpha_0)\ProdK{}\pi_k^{\alpha_k-1}
 \end{equation}
 \begin{equation}
     p(X|Z,\Theta)= \ProdN\ProdK\ProdJ[\ProbSingleCoin{}]^{z_{nk}}
@@ -116,7 +116,7 @@ and
     E_\Theta[ln\:p(X|Z,\Theta)] = \SumN\SumK z_{nk}E_\Theta[\SumJ ln\:\ProbSingleCoin]
 \end{equation}
 \begin{equation}
-    ln\: q^*(Z)=\SumN\SumK z_{nk}\left(E_\pi[ln\:\pi_k] + E_\Theta[SumJ ln\:\ProbSingleCoin]\right)
+    ln\: q^*(Z)=\SumN\SumK z_{nk}\left(E_\pi[ln\:\pi_k] + E_\Theta[\SumJ ln\:\ProbSingleCoin]\right)
 \end{equation}
 Proceeding similarly for \textbf{$\pi$} and \textbf{$\Theta$} we get the following expression
 \begin{equation}
@@ -131,7 +131,7 @@ where
     ln\:q^*(\pi) = ln\:p(\pi) + E_{Z}[ln\:p(Z|\pi)] + const
 \end{equation}
 \begin{equation}\label{factor_pi_log}
-    ln\:q^*(\pi) = (\alpha_0-1)\SumK{ln\:\pi_k} + \SumK r_k\:ln\:\pi_k+ const
+    ln\:q^*(\pi) = \SumK{(\alpha_k-1)\ln\:\pi_k} + \SumK r_k\:ln\:\pi_k+ const
 \end{equation}
 where $r_{k} = \SumN E[z_{nk}]$
 We have already derived the expectations over $Z$ in EM document.
@@ -139,13 +139,13 @@ Taking the exponential of equation \ref{factor_pi_log} we get that the
 \begin{equation}
     q(\pi) = Dir(\pi| \upalpha)
 \end{equation}
-where $\upalpha$ is vector with K components $\alpha_k = \alpha_0+r_k$
+where $\upalpha$ is vector with K components $\upalpha_k = \alpha_k+r_k$
 
 \begin{equation}
     ln\:q^*(\Theta) = ln\:p(\Theta) + E_Z[ln\:p(X|Z,\Theta)] + const
 \end{equation}
 \begin{equation}
-    ln\:q^*(\Theta) = \SumK (ln\:[\Theta_k^{a_k-1}(1-\Theta_k)^{b_k-1}] + r_{k}\SumJ \:ln[\Theta_k^{x_n^j}(1-\Theta_k)^{1-x_n^j}]_ + const
+    ln\:q^*(\Theta) = \SumK (ln\:[\Theta_k^{a_k-1}(1-\Theta_k)^{b_k-1}] + \SumN r_{nk}\SumJ \:ln[\Theta_k^{x_n^j}(1-\Theta_k)^{1-x_n^j}]_ + const
 \end{equation}
 \begin{equation}
     ln\:q^*(\Theta) = \SumK ln\:[\Theta_k^{a_k-1+n_H{r_k}}(1-\Theta_k)^{b_k-1+n_T{r_k}}] + const
@@ -171,7 +171,7 @@ this simplifies to
 \end{equation}
 We write down each of the terms separately:
 \begin{equation}
-    E[ln\:p(\pi)] = ln\:C(\alpha_0)+(\alpha_0-1)\SumK (\psi(\alpha_k)-\psi(\SumK \alpha_k))
+    E[ln\:p(\pi)] = ln\:C(\alpha_0)+\SumK (\alpha_k-1)(\psi(\alpha_k)-\psi(\SumK \alpha_k))
 \end{equation}
 \begin{equation}
     E[ln\:p(\Theta|a,b)]=\SumK (\psi(a_k)-\psi(a_k+b_k))
