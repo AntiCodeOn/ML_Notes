@@ -21,11 +21,11 @@ heads = np.sum(bin_events, axis = 1)
 tails = Total - heads
 experiments = np.column_stack((heads, tails))
 
-dirichlet_param = np.array([[5, 5]])
-r_nk = np.ones((5,2))
-ro_nk = 2*np.ones((5,2))
-beta_k1 = np.array([2, 2])
-beta_k2 = np.array([5, 3])
+dirichlet_param = np.array([[0.001, 0.001]], dtype=np.float64)
+#r_nk = np.ones((5,2))
+#ro_nk = 2*np.ones((5,2))
+beta_k1 = np.array([2, 2], dtype=np.float64)
+beta_k2 = np.array([5, 3], dtype=np.float64)
 beta_param = np.column_stack((np.transpose(beta_k1), np.transpose(beta_k2)))
 
 def calc_ro(outcomes, dirichlet_param, beta_param):
@@ -44,15 +44,13 @@ def calc_r(ro_nk):
 	return ro_nk/sum_ro_nk
 
 def update_dirichlet_param(dirichlet_param, r_nk):
-	print("r_k: ", np.sum(r_nk,axis=0))
+	#print("r_k: ", np.sum(r_nk,axis=0))
 	param_new = dirichlet_param + np.sum(r_nk,axis=0)	
 	return param_new
 
 def update_beta_param(beta_param, r_nk, outcomes):
-	r_k = np.sum(r_nk, axis=0).reshape(1,2)
-	outcomes_t = np.sum(outcomes, axis=0)
-	a_update = outcomes_t[0]*r_k
-	b_update = outcomes_t[1]*r_k
+	a_update = np.sum(outcomes_t[:,0]*r_nk).reshape(1, beta_param.shape[1])
+	b_update = np.sum(outcomes_t[:,1]*r_nk).reshape(1, beta_param.shape[1])
 	beta_update = np.stack((a_update, b_update)).reshape(beta_param.shape)
 	return beta_param + beta_update
 	
@@ -64,6 +62,9 @@ def update_beta_param2(beta_param, r_nk, outcomes):
 	beta_update = np.stack((a_update, b_update)).reshape(beta_param.shape)
 	return beta_param + beta_update
 
+def logC(a):
+	return special.gammaln(np.sum(a)) - np.sum(special.gammaln(a))
+
 def exp_p_theta(beta_param):
 	beta_a = beta_param[0,:]
 	beta_b = beta_param[1,:]
@@ -74,8 +75,11 @@ def exp_p_theta(beta_param):
 def exp_p_pi(dirichlet_param):
 	alpha_tilde = np.sum(dirichlet_param)
 	exp_pi = np.sum((1 - dirichlet_param)*(special.psi(dirichlet_param) - special.psi(alpha_tilde)))
-	C_alpha =  special.gamma(alpha_tilde)/np.prod(special.gamma(dirichlet_param))
-	return np.log(C_alpha)+exp_pi
+	logC_alpha = logC(dirichlet_param)
+	#C_alpha =  special.gamma(alpha_tilde)/np.prod(special.gamma(dirichlet_param))
+	#print("alpha_tilde: ", alpha_tilde)
+	print("C_alpha: ", logC_alpha)
+	return exp_pi + logC_alpha
 	
 
 def ELBO(dirichlet_old, beta_old, dirichlet_new, beta_new):
@@ -85,11 +89,11 @@ def ELBO(dirichlet_old, beta_old, dirichlet_new, beta_new):
 #print(dirichlet_param)
 #print(np.shape(dirichlet_param))
 #print(r_nk)
-for i in range(1000):
+for i in range(100):
 	ro_nk = calc_ro(experiments, dirichlet_param, beta_param)
-	print("ro_nk: ", ro_nk)
+	#print("ro_nk: ", ro_nk)
 	r_nk = calc_r(ro_nk)
-	print("r_nk: ", r_nk)
+	#print("r_nk: ", r_nk)
 	dirichlet_new = update_dirichlet_param(dirichlet_param, r_nk)
 	print("dirichlet_new: ", dirichlet_new)
 	beta_new = update_beta_param2(beta_param, r_nk, experiments)
