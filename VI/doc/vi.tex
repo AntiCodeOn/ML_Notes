@@ -13,6 +13,7 @@
 \newcommand\Factorized{q(Z,\Theta,\pi,a,b)}
 \newcommand\ProbZGivenpi{\mbox{P(Z)}}
 \newcommand\ProbSingleCoin{\Theta_k^{x_n^j}(1-\Theta_k)^{1-x_n^j}}
+\newcommand\ProbAllCoins{\Theta_k^{n_H}(1-\Theta_k)^{n_T}}
 
 
 
@@ -115,9 +116,11 @@ and
 \begin{equation}
     E_\Theta[ln\:p(X|Z,\Theta)] = \SumN\SumK z_{nk}E_\Theta[\SumJ ln\:\ProbSingleCoin]
 \end{equation}
+Hence
 \begin{equation}
-    ln\: q^*(Z)=\SumN\SumK z_{nk}\left(E_\pi[ln\:\pi_k] + E_\Theta[\SumJ ln\:\ProbSingleCoin]\right)
+    ln\: q^*(Z)=\SumN\SumK z_{nk}\left(E_\pi[ln\:\pi_k] + E_\Theta[ln\:\ProbAllCoins]\right) + const
 \end{equation}
+where $n_H$ is a number of heads and $n_T$ number of tails in the n-th experiment.
 Proceeding similarly for \textbf{$\pi$} and \textbf{$\Theta$} we get the following expression
 \begin{equation}
     ln\: q^*(\pi,\Theta)=E_{Z}[ln\:(\pi) + ln\:p(Z|\pi)] + E_Z[ln\:p(X|Z,\Theta) + ln\:p(\Theta)] + const
@@ -174,13 +177,13 @@ We write down each of the terms separately:
     E[ln\:p(\pi)] = ln\:C(\alpha_0)+\SumK (\alpha_k-1)(\psi(\alpha_k)-\psi(\SumK \alpha_k))
 \end{equation}
 \begin{equation}
-    E[ln\:p(\Theta|a,b)]=\SumK (\psi(a_k)-\psi(a_k+b_k))
+    E[ln\:p(\Theta_k|a,b)]=\SumK -ln\:Beta(a_k,b_k)+(a_k-1)\psi(a_k)-(b_k-1)\psi(b_k)+(a_k+b_k-2)\psi(a_k+b_k)
 \end{equation}
 \begin{equation}
     E[ln\:p(Z|\pi) = \SumN\SumK r_{nk}(\psi(\alpha_k)-\psi(\SumK \alpha_k))
 \end{equation}
 \begin{equation}
-    E[ln\:p(X|Z,\Theta)] = \SumN\SumJ\SumK r_{nk}[n_H(\psi(a_k)-\psi(a_k+b_k))+n_T(\psi(b_k)-\psi(a_k+b_k))]
+    E[ln\:p(X|Z,\Theta)] = \SumN\SumK r_{nk}[n_H(\psi(a_k)-\psi(a_k+b_k))+n_T(\psi(b_k)-\psi(a_k+b_k))]
 \end{equation}
 \section{Algorithm}
 \textit{This section should contain algorithmic description of the problem}

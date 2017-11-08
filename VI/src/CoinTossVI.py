@@ -63,12 +63,12 @@ def update_beta_param2(beta_param, r_nk, outcomes):
 	return beta_param + beta_update
 
 def logC(a):
-	return special.gammaln(np.sum(a)) - np.sum(special.gammaln(a))
+   return special.gammaln(np.sum(a, axis=1)) - np.sum(special.gammaln(a), axis=1)
 
 def exp_p_theta(beta_param):
 	beta_a = beta_param[0,:]
 	beta_b = beta_param[1,:]
-	p_theta_k = special.psi(beta_a) + special.psi(beta_a+beta_b)
+	p_theta_k = logC(beta_param) + special.psi(beta_a) + special.psi(beta_a+beta_b)
 	p_theta = np.sum(p_theta_k)
 	return p_theta
 
@@ -101,3 +101,5 @@ for i in range(100):
 	print("delta ", i, ": ", ELBO(dirichlet_param, beta_param, dirichlet_new, beta_new))
 	dirichlet_param = dirichlet_new
 	beta_param = beta_new
+	print("beta", logC(beta_param))
+
