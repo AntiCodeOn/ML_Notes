@@ -66,15 +66,15 @@ def logC(a):
    return special.gammaln(np.sum(a, axis=1)) - np.sum(special.gammaln(a), axis=1)
 
 def psi_diff(param):
-   print(special.psi(param))
-   print(special.psi(np.sum(param, axis=1)))
-   print(special.psi(param) - special.psi(np.sum(param, axis=1)))
+   #print(special.psi(param))
+   #print(special.psi(np.sum(param, axis=1)))
+   #print(special.psi(param) - special.psi(np.sum(param, axis=1)))
    return special.psi(param) - special.psi(np.sum(param, axis=1)) 
 
 def sum_psi_diff(param):
-   print(psi_diff(param))
-   print(param-1.)
-   print((param-1.)*psi_diff(param))
+   #print(psi_diff(param))
+   #print(param-1.)
+   #print((param-1.)*psi_diff(param))
    return np.sum((param - 1.)*psi_diff(param), axis=1).reshape(param.shape[0], 1)
 
 def exp_p_pi(param):
@@ -86,7 +86,7 @@ def exp_p_theta(beta_param):
    exp_theta = sum_psi_diff(np.transpose(beta_param))
    beta_mirror = np.stack((beta_b, beta_a)).reshape(beta_param.shape)
    exp_one_min_theta = sum_psi_diff(np.transpose(beta_mirror))
-   return np.sum(exp_theta-exp_one_min_theta+logC(np.transpose(beta_param)))
+   return np.sum(exp_theta+exp_one_min_theta+logC(np.transpose(beta_param)))
 
 def exp_p_X(r_nk, beta_param, outcomes):
    part1 = outcomes[:,0]*np.sum(psi_diff(np.transpose(beta_param)))
@@ -106,6 +106,13 @@ def exp_q_Z(r_nk):
 def ELBO(r_nk, dirichlet_old, beta_old, dirichlet_new, beta_new):
    elbo = exp_p_X(r_nk, beta_old, experiments) + exp_p_Z(r_nk, dirichlet_old) + exp_p_pi(dirichlet_old) + exp_p_theta(beta_old) - \
           exp_q_Z(r_nk) - exp_p_theta(beta_new) - exp_p_pi(dirichlet_new)
+   print("p_X: ", exp_p_X(r_nk, beta_old, experiments))
+   print("p_Z: ", exp_p_Z(r_nk, dirichlet_old))
+   print("q_Z: ", exp_q_Z(r_nk))
+   #print("pi_old: ", exp_p_pi(dirichlet_old))
+   #print("pi_new: ", exp_p_pi(dirichlet_new))
+   print("theta_old: ", exp_p_theta(beta_old))
+   print("theta_new: ", exp_p_theta(beta_new))
    return elbo
 
 #print(exp_p_pi(np.array([2, 2]).reshape(1,2)))
@@ -117,16 +124,16 @@ def ELBO(r_nk, dirichlet_old, beta_old, dirichlet_new, beta_new):
 #print(np.shape(dirichlet_param))
 #print(r_nk)
 if __name__ == '__main__':
-   for i in range(10):
+   for i in range(100):
       ro_nk = calc_ro(experiments, dirichlet_param, beta_param)
       #print("ro_nk: ", ro_nk)
       r_nk = calc_r(ro_nk)
       #print("r_nk: ", r_nk)
       dirichlet_new = update_dirichlet_param(dirichlet_param, r_nk)
-      print("dirichlet_new: ", dirichlet_new)
+      #print("dirichlet_new: ", dirichlet_new)
       beta_new = update_beta_param2(beta_param, r_nk, experiments)
-      print("beta_new: ", beta_new)
+      #print("beta_new: ", beta_new)
       print("delta ", i, ": ", ELBO(r_nk, dirichlet_param, beta_param, dirichlet_new, beta_new))
       dirichlet_param = dirichlet_new
       beta_param = beta_new
-      print("beta", logC(beta_param))
+      #print("beta", logC(beta_param))
