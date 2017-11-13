@@ -2,6 +2,8 @@ import numpy as np
 import operator
 import matplotlib.pyplot as plt
 from scipy import stats, special
+
+import pyprint
 #import sympy as sp
 
 #true (unknown theta values)
@@ -22,11 +24,11 @@ tails = Total - heads
 experiments = np.column_stack((heads, tails))
 print("shape", experiments.shape)
 
-dirichlet_param = np.array([[1.001, 1.001]], dtype=np.float64)
+dirichlet_param = np.array([[0.501, 0.501]], dtype=np.float64)
 r_nk = 2*np.ones((5,2))
 #ro_nk = 2*np.ones((5,2))
-beta_k1 = np.array([2, 2], dtype=np.float64)
-beta_k2 = np.array([5, 3], dtype=np.float64)
+beta_k1 = np.array([2, 1], dtype=np.float64)
+beta_k2 = np.array([3, 5], dtype=np.float64)
 beta_param = np.column_stack((np.transpose(beta_k1), np.transpose(beta_k2)))
 
 def calc_ro(outcomes, dirichlet_param, beta_param):
@@ -67,15 +69,9 @@ def logC(a):
    return special.gammaln(np.sum(a, axis=1)) - np.sum(special.gammaln(a), axis=1)
 
 def psi_diff(param):
-   #print(special.psi(param))
-   #print(special.psi(np.sum(param, axis=1)))
-   #print(special.psi(param) - special.psi(np.sum(param, axis=1)))
    return special.psi(param) - special.psi(np.sum(param, axis=1)) 
 
 def sum_psi_diff(param):
-   #print(psi_diff(param))
-   #print(param-1.)
-   #print((param-1.)*psi_diff(param))
    return np.sum((param - 1.)*psi_diff(param), axis=1).reshape(param.shape[0], 1)
 
 def exp_p_pi(param):
@@ -109,7 +105,8 @@ def ELBO(r_nk, dirichlet_old, beta_old, dirichlet_new, beta_new):
    #print("pi_new: ", exp_p_pi(dirichlet_new))
    print("theta_old: ", exp_p_theta(beta_old))
    print("theta_new: ", exp_p_theta(beta_new))
-   return elbo
+   print("elbo: ", float(elbo))
+   return float(elbo[0])
 
 #print(exp_p_pi(np.array([2, 2]).reshape(1,2)))
 #print(exp_p_theta(np.array([[2, 2],[1, 1]]).reshape(2,2)))
@@ -119,6 +116,7 @@ def ELBO(r_nk, dirichlet_old, beta_old, dirichlet_new, beta_new):
 #print(dirichlet_param)
 #print(np.shape(dirichlet_param))
 #print(r_nk)
+elbo_history = []
 elbo_old = 0
 if __name__ == '__main__':
    for i in range(10000):
@@ -127,15 +125,22 @@ if __name__ == '__main__':
       r_nk = calc_r(ro_nk)
       #print("r_nk: ", r_nk)
       dirichlet_new = update_dirichlet_param(dirichlet_param, r_nk)
-      #print("dirichlet_new: ", dirichlet_new)
+      print("dirichlet_new: ", dirichlet_new)
       beta_new = update_beta_param2(beta_param, r_nk, experiments)
-      #print("beta_new: ", beta_new)
+      print("beta_new: ", beta_new)
       elbo_new = ELBO(r_nk, dirichlet_param, beta_param, dirichlet_new, beta_new)
       print("delta ", i, ": ", elbo_new)
       if(abs(elbo_new - elbo_old) > 0.001):
          elbo_old = elbo_new
+         elbo_history.append(elbo_new)
       else:
          break
       dirichlet_param = dirichlet_new
       beta_param = beta_new
       #print("beta", logC(beta_param))
+
+print(beta_param)
+
+#print(elbo_history)
+pyprint.plot_beta(beta_param)
+pyprint.plot_elbo(elbo_history)
