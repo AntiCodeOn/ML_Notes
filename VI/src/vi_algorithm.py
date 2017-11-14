@@ -3,19 +3,8 @@ from scipy import stats, special
 
 import vi_statistic as vis
 
-def calc_ro(outcomes, dirichlet_param, beta_param):
-   alpha_tilde = np.sum(dirichlet_param)
-   exp_pi = special.psi(dirichlet_param) - special.psi(alpha_tilde)
-   heads = outcomes[:,0].reshape(outcomes.shape[0],1)
-   tails = outcomes[:,1].reshape(outcomes.shape[0],1)
-   beta_a = beta_param[0,:]
-   beta_b = beta_param[1,:]
-   exp_theta = heads*special.psi(beta_a) + tails*special.psi(beta_b) - (heads+tails)*special.psi(beta_a+beta_b)
-   ln_ro_nk = exp_pi + exp_theta
-   return np.exp(ln_ro_nk)
-
 def calc_r(outcomes, dirichlet_param, beta_param):
-   ro_nk = calc_ro(outcomes, dirichlet_param, beta_param)
+   ro_nk = vis.calc_ro(outcomes, dirichlet_param, beta_param)
    sum_ro_nk = np.sum(ro_nk, axis=1).reshape(ro_nk.shape[0], 1)
    return ro_nk/sum_ro_nk
 
