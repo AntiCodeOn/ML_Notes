@@ -22,6 +22,8 @@ def plot_beta(beta_param):
    plt.plot(z, p_z2, linewidth=2.)
    plt.axvline(0.45, color='red')
    plt.axvline(0.80, color='red')
+   plt.axvline(0.79, color='blue')
+   plt.axvline(0.52, color='orange')
    plt.ylabel('p(Theta)')
    plt.show()
 
