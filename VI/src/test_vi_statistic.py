@@ -58,7 +58,7 @@ def test_psi_diff3():
 
 def test_exp_pi():
    param = np.array([1., 2])
-   expected = stats.dirichlet.entropy(param)
+   expected = -1*stats.dirichlet.entropy(param)
    p_pi = vis.exp_p_pi(param.reshape(1,2))
    print("expected ", expected)
    print("p_pi ", p_pi)
@@ -72,12 +72,12 @@ def test_sum_psi_diff():
    npt.assert_equal(sum_diff_psi.shape, expected.shape)
 
 def test_exp_p_theta():
-   expected1 = stats.beta.entropy(1., 2.)
-   expected2 = stats.beta.entropy(2., 1.)
+   expected1 = -1*stats.beta.entropy(1., 2.)
+   expected2 = -1*stats.beta.entropy(2., 1.)
    print("expected1", expected1)
    print("expected2", expected2)
    p_theta = vis.exp_p_theta([[1., 2.],[2., 1.]])
-   npt.assert_equal(1.,1.)
+   npt.assert_equal(p_theta, [expected1, expected2])
 
 def test_exp_p_Z():
    r_nk = np.ones((5,2))

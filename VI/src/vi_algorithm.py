@@ -13,12 +13,6 @@ def update_dirichlet_param(dirichlet_param, r_nk):
    param_new = dirichlet_param + np.sum(r_nk,axis=0)  
    return param_new
 
-def update_beta_param(beta_param, r_nk, outcomes):
-   a_update = np.sum(outcomes_t[:,0]*r_nk).reshape(1, beta_param.shape[1])
-   b_update = np.sum(outcomes_t[:,1]*r_nk).reshape(1, beta_param.shape[1])
-   beta_update = np.stack((a_update, b_update)).reshape(beta_param.shape)
-   return beta_param + beta_update
-   
 def update_beta_param2(beta_param, r_nk, outcomes):
    heads = outcomes[:,0].reshape(outcomes.shape[0],1)
    tails = outcomes[:,1].reshape(outcomes.shape[0],1)
