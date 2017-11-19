@@ -1,10 +1,9 @@
-import unittest
-import vi_algorithm as via
 import numpy as np
 import numpy.testing as npt
-import scipy.stats
 import sys
-from scipy import stats, special
+import unittest
+
+import vi_algorithm as via
 
 #experiment outcomes (5x10)
 events = (['HTTTHHTHTH',
@@ -25,11 +24,12 @@ beta_k1 = np.array([2, 2], dtype=np.float64)
 beta_k2 = np.array([5, 3], dtype=np.float64)
 beta_param = np.column_stack((np.transpose(beta_k1), np.transpose(beta_k2)))
 
-#digamma(1) = -0.5772
-#digamma(2) = 0.4228
-#digamma(3) = 0.9228
 def test_calc_r():
-   r_nk = calc_r(experiments, dirichlet_param, beta_param)
+   r_nk = via.calc_r(experiments, dirichlet_param, beta_param)
+   npt.assert_equal(r_nk.shape, [5,2])
+   sum_r_nk = np.sum(r_nk, axis = 1).reshape(5,1)
+   one_vector = 1.0*np.ones((5,1))
+   npt.assert_allclose(sum_r_nk, one_vector)
 
 def test_update_dirichlet_param():
    dirichlet_old = np.array([[0.5, 1.5]])
@@ -47,5 +47,4 @@ def test_update_beta_param():
    npt.assert_equal(beta_new, expected)
 
 if __name__ == '__main__':
-   #unittest.main()
    npt.run_module_suite(argv=sys.argv)

@@ -5,7 +5,11 @@ import vi_statistic as vis
 
 def calc_r(outcomes, dirichlet_param, beta_param):
    ro_nk = vis.calc_ro(outcomes, dirichlet_param, beta_param)
+   print(ro_nk)
+   print(ro_nk.shape)
    sum_ro_nk = np.sum(ro_nk, axis=1).reshape(ro_nk.shape[0], 1)
+   print(sum_ro_nk)
+   print(sum_ro_nk.shape)
    return ro_nk/sum_ro_nk
 
 def update_dirichlet_param(dirichlet_param, r_nk):

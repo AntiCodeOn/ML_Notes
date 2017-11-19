@@ -2,7 +2,8 @@ import numpy as np
 from scipy import stats, special
 
 def logC(a):
-   return special.gammaln(np.sum(a, axis=1)) - np.sum(special.gammaln(a), axis=1)
+   result = special.gammaln(np.sum(a, axis=1)) - np.sum(special.gammaln(a), axis=1)
+   return result.reshape(a.shape[0], 1)
 
 def psi_diff(param):
    return special.psi(param) - special.psi(np.sum(param, axis=1).reshape(param.shape[0], 1)) 

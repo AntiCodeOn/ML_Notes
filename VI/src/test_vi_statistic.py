@@ -38,6 +38,11 @@ def test_logC():
 def test_logC2():
    npt.assert_allclose(vis.logC(np.array([[1., 2., 3.]])), 4.09434456222)
 
+def test_logC3():
+   logC = vis.logC(np.array([[1., 2.],[2., 1.]]))
+   print(logC.shape)
+   npt.assert_equal(logC.shape, [2, 1])
+
 def test_psi_diff():
    diff_psi = vis.psi_diff(np.array([[1., 2.]]))
    expected = np.array([[-1.5, -0.5]])
@@ -74,10 +79,11 @@ def test_sum_psi_diff():
 def test_exp_p_theta():
    expected1 = -1*stats.beta.entropy(1., 2.)
    expected2 = -1*stats.beta.entropy(2., 1.)
-   print("expected1", expected1)
-   print("expected2", expected2)
-   p_theta = vis.exp_p_theta([[1., 2.],[2., 1.]])
-   npt.assert_equal(p_theta, [expected1, expected2])
+   p_theta = vis.exp_p_theta(np.array([[1., 2.],[2., 1.]]))
+   print(expected1)
+   print(expected2)
+   print(p_theta)
+   npt.assert_allclose(p_theta, np.sum([expected1, expected2]))
 
 def test_exp_p_Z():
    r_nk = np.ones((5,2))
@@ -92,5 +98,4 @@ def test_exp_q_Z():
    npt.assert_allclose(q_Z, expected)
 
 if __name__ == '__main__':
-   #unittest.main()
    npt.run_module_suite(argv=sys.argv)
