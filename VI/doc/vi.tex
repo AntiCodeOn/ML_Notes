@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{upgreek}
 \usepackage{amssymb}
+\usepackage[]{algorithm2e}
 
 \title{Variational Inference with Coin Toss example}
 \author{AntiCodeOn \\ email: {anticodeon@gmail.com}  }
@@ -187,4 +188,23 @@ We write down each of the terms separately:
 \end{equation}
 \section{Algorithm}
 \textit{This section should contain algorithmic description of the problem}
+\begin{center}
+
+\begin{algorithm}[H]
+ \KwData{this text}
+ \KwResult{how to write algorithm with \LaTeX2e }
+ initialization\;
+ \While{not at end of this document}{
+  read current\;
+  \eIf{understand}{
+   go to next section\;
+   current section becomes this one\;
+   }{
+   go back to the beginning of current section\;
+  }
+ }
+ \caption{How to write algorithms}
+\end{algorithm}
+\end{center}
+
 \end{document}
