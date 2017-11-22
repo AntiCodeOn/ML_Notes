@@ -16,18 +16,22 @@ def plot_beta(beta_old, beta_new):
 
    p_z1 = scs.beta(beta_old1[0], beta_old1[1]).pdf(z)
    p_z2 = scs.beta(beta_old2[0], beta_old2[1]).pdf(z)
+   p_z1 = p_z1/np.amax(p_z1)
+   p_z2 = p_z2/np.amax(p_z2)
 
    plt.figure(figsize=(12, 7))
-   plt.plot(z, p_z1, linewidth=1.)
-   plt.plot(z, p_z2, linewidth=1.)
+   plt.plot(z, p_z1, linewidth=1., color='red')
+   plt.plot(z, p_z2, linewidth=1., color='blue')
 
    beta_new1 = np.transpose(beta_new[:,0])
    beta_new2 = np.transpose(beta_new[:,1])
 
    p_z1 = scs.beta(beta_new1[0], beta_new1[1]).pdf(z)
    p_z2 = scs.beta(beta_new2[0], beta_new2[1]).pdf(z)
-   plt.plot(z, p_z1, linewidth=1.)
-   plt.plot(z, p_z2, linewidth=1.)
+   p_z1 = p_z1/np.amax(p_z1)
+   p_z2 = p_z2/np.amax(p_z2)
+   plt.plot(z, p_z1, linewidth=2., color='red')
+   plt.plot(z, p_z2, linewidth=2., color='blue')
    #plt.axvline(0.45, color='red')
    #plt.axvline(0.80, color='red')
    #plt.axvline(0.79, color='blue')
