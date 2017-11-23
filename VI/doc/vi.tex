@@ -4,6 +4,8 @@
 \usepackage{upgreek}
 \usepackage{amssymb}
 \usepackage[]{algorithm2e}
+\usepackage{graphicx}
+\usepackage{float}
 
 \title{Variational Inference with Coin Toss example}
 \author{AntiCodeOn \\ email: {anticodeon@gmail.com}  }
@@ -191,10 +193,10 @@ We write down each of the terms separately:
 \begin{center}
 
 \begin{algorithm}[H]
- \KwData{this text}
- \KwResult{how to write algorithm with \LaTeX2e }
+ \KwData{Data $X_{1:n}$, number of components K}
+ \KwResult{Variational densities $q(\Theta_k;a_k,b_k)$ and $q(z_{nk}, \alpha_k$}
  initialization\;
- \While{not at end of this document}{
+ \While{the ELBO has not converged }{
   read current\;
   \eIf{understand}{
    go to next section\;
@@ -206,5 +208,14 @@ We write down each of the terms separately:
  \caption{How to write algorithms}
 \end{algorithm}
 \end{center}
-
+\section{Results}
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{ELBO_Convergence}\label{elbo:conv}
+\caption{Different initialization converge to different local optima of the ELBO}
+\end{figure}
+\textbf{Initialization.} The ELBO is generally a non-convex objective function. Convergence to the local optimum is guaranteed, however, it can be sensitive with regard to the initialization. Figure \ref{elbo:conv} shows the ELBO convergence for 100 random initializations of the model parameters. Red line denotes the average of the convergence asymptote for all runs. 
+\textbf{Convergence.} We define the treshold for the change of ELBO value between subsequent algorithm iterations. Once this difference has fallen under the treshold the procedure stops.
+\textbf{Calculation}. During the calculation of the coefficient (which may grow arbitrarily large) we have encountered the problems with the calculation of the normalization coefficient for Dirichlet distribution. Replacing the hand-crafted version with the one from \textit{scipy} package resolved the problem.
+\section{Conclusion}
+We described variational inference algorithm with mean-field approximation. We have derived parameter update equations for a simple mixture model. Evidence lower bound optimization procedure was used as a criteria for algorithm convergence. We have choosen probability distribution from exponential family 
 \end{document}
