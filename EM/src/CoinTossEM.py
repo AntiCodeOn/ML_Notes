@@ -65,9 +65,12 @@ for i in range(10000):
 
 fig, ax = plt.subplots()
 x = list(range(len(rThetaList0)))
-ax.plot(x, rThetaList0)
-ax.plot(x, rThetaList1)
+ax.plot(x, rThetaList0, label="Coin 1")
+ax.plot(x, rThetaList1, label="Coin 2")
 ax.grid()
+plt.legend(loc='right')
+plt.xlabel('Iterations')
+plt.ylabel('Coin bias')
 fig.tight_layout()
 plt.show()
 	
