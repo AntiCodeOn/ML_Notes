@@ -32,9 +32,10 @@ def convergence_policy(elbo_old, elbo_new, i, iterations):
       return (abs(elbo_new - elbo_old) > 0.001)
 
 
-def vi_algorithm(params_list = []):
+def vi_algorithm(params_list = [], snapshot_list = []):
    elbo_log = []
    beta_log = []
+   snapshot = []
    for param in params_list: 
       dirichlet_param, beta_param = param[0], param[1]
       iterations = param[2]
@@ -49,6 +50,9 @@ def vi_algorithm(params_list = []):
 
          dirichlet_param = dirichlet_new
          beta_param = beta_new
+         if i in snapshot_list:
+            print(i)
+            snapshot.append([r_nk, beta_new])
 
          if convergence_policy(elbo_old, elbo_new, i, iterations):
             elbo_old = elbo_new
@@ -59,7 +63,7 @@ def vi_algorithm(params_list = []):
       beta_log.append([param[1], beta_param])
 
       #pyprint.plot_beta(beta_param)
-   return elbo_log, beta_log
+   return elbo_log, beta_log, snapshot
 
 def create_random_params(iterations = 500):
       """
@@ -85,7 +89,7 @@ def experiment1():
    for i in range(100):
       params = create_random_params(iterations)
       params_list.append(params)
-   elbo_log, _ = vi_algorithm(params_list)
+   elbo_log, _ , _ = vi_algorithm(params_list)
    pyprint.plot_elbo(elbo_log)
 
 
@@ -96,10 +100,26 @@ def experiment2():
    for i in range(4):
       params = create_random_params(iterations)
       params_list.append(params)
-   _, beta_log = vi_algorithm(params_list)
+   _, beta_log, _ = vi_algorithm(params_list)
    for beta in beta_log:
       pyprint.plot_beta(beta[0], beta[1])
-   
+
+def experiment3():
+   iteration_stop = True
+   iterations = 20
+   param_list = []
+   snapshot_list = [0, 10, 19]
+   params_list = []
+   params_list.append(create_random_params(iterations))
+   _, beta_log, snapshot = vi_algorithm(params_list, snapshot_list)
+   betas = []
+   snapshots = []
+   for i in range(len(snapshot_list)):
+      #pyprint.plot_single_beta(snapshot[i][1])
+      print(snapshot[i][0])
+      snapshots.append([snapshot_list[i], snapshot[i][1]])
+   pyprint.subplot_beta(snapshots)
+
 
 dirichlet_param1 = np.array([[0.501, 0.501]], dtype=np.float64)
 beta_k1 = np.array([2, 1], dtype=np.float64)
@@ -115,6 +135,7 @@ params1 = [dirichlet_param1, beta_param1, iterations]
 params2 = [dirichlet_param2, beta_param2, iterations]
 
 if __name__ == '__main__':
-   experiment1()
-   experiment2()
+   #experiment1()
+   #experiment2()
+   experiment3()
 

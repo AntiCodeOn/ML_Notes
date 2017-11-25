@@ -3,13 +3,15 @@
 \usepackage{amsmath}
 \usepackage{upgreek}
 \usepackage{amssymb}
-\usepackage[]{algorithm2e}
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{csvsimple}
 
 \title{Variational Inference with Coin Toss example}
 \author{AntiCodeOn \\ email: {anticodeon@gmail.com}  }
-\date{September 2017}
+\date{November 2017}
 
 
 \newcommand\JointProb{p(X,Z,\Theta,\pi,a,b)}
@@ -79,20 +81,26 @@ which means that we are breaking possible dependencies between hidden variables 
 \begin{equation}
     ELBO(q) = \int q(Z)\: log\:{p(X,Z)}\:dZ - \int q(Z)\:log{\:q(Z)}\:dZ
 \end{equation}
+In our problem we are dealing with the discrete distribution. Fortunatelly, the setup is the same, we only need to changethe integral with the summation terms.
 
-\section{Variational inference application}
+\section{Variational inference mixture model}
+For each observation $x_n$ we have a corresponding latent variable $z_n$ comprising a 1-of-K binary vector with the elements $z_{nk}$ for $k = 1, \dots, K$. We denote the observed data set by $X = {x_1, \dots, x_N}$, and similarly we denote the latent variables by $Z={z_1, \dots, z_N}$. We can write down the conditional distribution of $Z$, given the mixing coefficients $\pi$, in the form:
 \begin{equation}
     p(Z|\pi) = \ProdN \ProdK \pi_k^{z_{nk}}
 \end{equation}
+We introduce priors over the parameter $\pi$. The mathematical analysis is considerably simplified if we choose conjugate prior distribution to model the parameter $\pi$. We choose a Dirichlet distribution over the mixing coefficients $\pi$. The parameter $\alpha$ can be interpreted as the effective prior number of observations associated with each component of the mixture. If the starting $\alpha$ value is small (bellow 1), then the posterior distribution is primarily influence by the data rather then our choise of prior.
 \begin{equation}
     p(\pi) = Dir(\pi|\alpha_0) = C(\alpha_0)\ProdK{}\pi_k^{\alpha_k-1}
 \end{equation}
+Next, we write down the conditional distribution of the observed data vectors, given the latent variables and the component parameters. Each of the five experiments $X$ comprises of the ten independent Bernoulli events.
 \begin{equation}
     p(X|Z,\Theta)= \ProdN\ProdK\ProdJ[\ProbSingleCoin{}]^{z_{nk}}
 \end{equation}
+We can model priors for the $\Theta$ parameter with the conjugate prior distribution of the Bernoulli distribution. As we are dealing with the coin biasses, which are defined on the interval [0, 1], beta distribution lends itself as a natural choice for our model.
 \begin{equation}
     p(\Theta|a,b) = \ProdK\frac{\Theta^{a-1}(1-\Theta)^{b-1}}{Beta(a,b)}
 \end{equation}
+\textit{Note. The Beta in the denominator denotes the Beta function, not the Beta probability distribution}.
 
 Joint distribution is given by
 \begin{equation}\label{joint_decomp}
@@ -154,14 +162,14 @@ where $\upalpha$ is vector with K components $\upalpha_k = \alpha_k+r_k$
     ln\:q^*(\Theta) = \SumK (ln\:[\Theta_k^{a_k-1}(1-\Theta_k)^{b_k-1}] + \SumN r_{nk}\SumJ \:ln[\Theta_k^{x_n^j}(1-\Theta_k)^{1-x_n^j}]_ + const
 \end{equation}
 \begin{equation}
-    ln\:q^*(\Theta) = \SumK ln\:[\Theta_k^{a_k-1+n_H{r_k}}(1-\Theta_k)^{b_k-1+n_T{r_k}}] + const
+    ln\:q^*(\Theta) = \SumK ln\:[\Theta_k^{a_k-1+\SumN n_Hr_{nk}}(1-\Theta_k)^{b_k-1+\SumN n_Tr_{nk}}] + const
 \end{equation}
-where $n_H$ equals number of the outcomes of $x_n^j = 1$ (number of heads), and $n_T$ number of the outcomes of $x_n^j = 0$ ( number tails).
+where $n_H$ equals number of the outcomes of $x_n^j = 1$ (number of heads), and $n_T$ number of the outcomes of $x_n^j = 0$ (number of tails).
 We see that the factor for $\Theta$ is Beta distributed variable:
 \begin{equation}
     q^*(\Theta) = \ProdK Beta(\Theta|A, B)
 \end{equation}
-where $A$ is a vector with parameter components $a = a_{k}+n_H{r_k}$ and $B$ with components $b = b_{k}+n_T{r_k}$.
+where $A$ is a vector with parameter components $a = a_{k}+\SumN n_Hr_{nk}$ and $B$ with components $b = b_{k}+\SumN n_Tr_{nk}$.
 \section{Variational lower bound}
 Variational lower bound $L$ is given by 
 \begin{equation}
@@ -189,33 +197,52 @@ We write down each of the terms separately:
     E[ln\:p(X|Z,\Theta)] = \SumN\SumK r_{nk}[n_H(\psi(a_k)-\psi(a_k+b_k))+n_T(\psi(b_k)-\psi(a_k+b_k))]
 \end{equation}
 \section{Algorithm}
-\textit{This section should contain algorithmic description of the problem}
-\begin{center}
-
-\begin{algorithm}[H]
- \KwData{Data $X_{1:n}$, number of components K}
- \KwResult{Variational densities $q(\Theta_k;a_k,b_k)$ and $q(z_{nk}, \alpha_k$}
- initialization\;
- \While{the ELBO has not converged }{
-  read current\;
-  \eIf{understand}{
-   go to next section\;
-   current section becomes this one\;
-   }{
-   go back to the beginning of current section\;
-  }
- }
- \caption{How to write algorithms}
+The following table gives the algorithmic description of the problem.
+\begin{algorithm}
+\caption{Coordinate ascent algorithm}
+\begin{algorithmic}
+\REQUIRE Data $x_{1:n}$, number of components K, model
+\ENSURE Variational densities q(z), q($\Theta$), q($\pi$)
+\STATE \textbf{Initialize:} Variational parameters $a_{1:K}$, $b_{1:K}$, $\alpha_{1:K}$
+\REPEAT
+\STATE Calculate responsibilities $r_{nk} = E[z_{nk}]$
+\FOR{$k=1$ to $K$}
+\STATE $\alpha_k^{new} = \alpha_k^{old} + r_k$
+\STATE $a_k^{new} = a_k^{old} + r_k$
+\STATE $b_k^{new} = b_k^{old} + r_k$
+\ENDFOR
+\STATE Compute $ELBO(q) = E[log\:p(z,x)]+E[log\:q(z)]$
+\UNTIL{ELBO has not converged}
+\end{algorithmic}
 \end{algorithm}
-\end{center}
+
 \section{Results}
+\textbf{EM.} Original paper where the problem of determining coin toss biases appeared uses Expectation Maximization algorithm in order to find the solution. However, EM algorithm gives us only the point estimate of the bias values as shown in Figure \ref{em:conv}.
 \begin{figure}[H]
-\includegraphics[width=\textwidth]{ELBO_Convergence}\label{elbo:conv}
-\caption{Different initialization converge to different local optima of the ELBO}
+\includegraphics[width=\textwidth]{EM_Convergence}
+\caption{Coin bias convergence curve using Expectation Maximization algorithm}
+\label{em:conv}
+\end{figure}
+\textbf{VI.} In contrast, variational inference (Bayes in general) uses the underlaying prior distribution of the parameters. These can be further modeled with the additional distributions, or as we have done in our solution, initialized using hyperparameters. The result of the Variational Inference algorithm contains not only the most probable solution but also the information about confidence in the calculated values. Figure \ref{vi:conv} shows how confidence in the values grows as we increase number of iterations.
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{VI_Convergence}
+\caption{Coin bias convergence curve using Variational Inference algorithm}
+\label{vi:conv}
+\end{figure}
+\begin{table}
+\csvautotabular{responsibilities.csv}
+\caption {Coin responsibilities}
+\label{resp:conv}
+\end{table}
+\textbf{Responsibilities.} Also, we have modeled the distribution of the K components, therefore we can track how expected values of the classes converge to their real values. This is show using the Table \ref{resp:conv} for the same iteration steps as in Figure \ref{vi:conv}. We call this responsibilities, because it shows us the probability that the coin $k$ (columns) is responsible for the event $n$ (rows) in the iteration $i$ of the algorithm.
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{ELBO_Convergence}
+\caption{Different initializations converge to different local optima of the ELBO}
+\label{elbo:conv}
 \end{figure}
 \textbf{Initialization.} The ELBO is generally a non-convex objective function. Convergence to the local optimum is guaranteed, however, it can be sensitive with regard to the initialization. Figure \ref{elbo:conv} shows the ELBO convergence for 100 random initializations of the model parameters. Red line denotes the average of the convergence asymptote for all runs. 
 \textbf{Convergence.} We define the treshold for the change of ELBO value between subsequent algorithm iterations. Once this difference has fallen under the treshold the procedure stops.
 \textbf{Calculation}. During the calculation of the coefficient (which may grow arbitrarily large) we have encountered the problems with the calculation of the normalization coefficient for Dirichlet distribution. Replacing the hand-crafted version with the one from \textit{scipy} package resolved the problem.
 \section{Conclusion}
-We described variational inference algorithm with mean-field approximation. We have derived parameter update equations for a simple mixture model. Evidence lower bound optimization procedure was used as a criteria for algorithm convergence. We have choosen probability distribution from exponential family 
+We described variational inference algorithm with mean-field approximation. Update equations for a simple mixture models were derived. Evidence lower bound optimization procedure was used as a criteria for algorithm convergence. We have choosen probability distribution from exponential family with conjugate priors in order to simplify the mathematical model construction.
 \end{document}

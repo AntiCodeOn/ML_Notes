@@ -8,6 +8,45 @@ np.random.seed(733)
 matplotlib.rcParams.update({'font.size': 14})
 plt.style.use(['seaborn-pastel', 'seaborn-white'])
 
+def plot_single_beta(beta):
+   z = np.linspace(0, 1, 250)
+
+   beta1 = np.transpose(beta[:,0])
+   beta2 = np.transpose(beta[:,1])
+
+   p_z1 = scs.beta(beta1[0], beta1[1]).pdf(z)
+   p_z2 = scs.beta(beta2[0], beta2[1]).pdf(z)
+   p_z1 = p_z1/np.amax(p_z1)
+   p_z2 = p_z2/np.amax(p_z2)
+
+   plt.figure(figsize=(10, 6))
+   plt.plot(z, p_z1, linewidth=1., color='red')
+   plt.plot(z, p_z2, linewidth=1., color='blue')
+   plt.ylabel('p(Theta)')
+   plt.show()
+
+def subplot_beta(snapshots):
+   fig = plt.figure(figsize=(10, 8))
+   z = np.linspace(0, 1, 250)
+   plt.ylabel('p(Theta)')
+   for i in range(len(snapshots)):
+      ax = fig.add_subplot(3, 1, i+1)
+      beta = snapshots[i][1]
+      beta1 = np.transpose(beta[:,0])
+      beta2 = np.transpose(beta[:,1])
+
+      p_z1 = scs.beta(beta1[0], beta1[1]).pdf(z)
+      p_z2 = scs.beta(beta2[0], beta2[1]).pdf(z)
+      p_z1 = p_z1/np.amax(p_z1)
+      p_z2 = p_z2/np.amax(p_z2)
+      ax.set_title("Iteration" + str(snapshots[i][0]))
+
+      plt.plot(z, p_z1, linewidth=1., color='red')
+      plt.plot(z, p_z2, linewidth=1., color='blue')
+      
+
+   plt.show()
+
 def plot_beta(beta_old, beta_new):
    z = np.linspace(0, 1, 250)
 
@@ -19,9 +58,9 @@ def plot_beta(beta_old, beta_new):
    p_z1 = p_z1/np.amax(p_z1)
    p_z2 = p_z2/np.amax(p_z2)
 
-   plt.figure(figsize=(12, 7))
-   plt.plot(z, p_z1, linewidth=1., color='red')
-   plt.plot(z, p_z2, linewidth=1., color='blue')
+   plt.figure(figsize=(10, 6))
+   plt.plot(z, p_z1, linewidth=1., color='orange')
+   plt.plot(z, p_z2, linewidth=1., color='green')
 
    beta_new1 = np.transpose(beta_new[:,0])
    beta_new2 = np.transpose(beta_new[:,1])
